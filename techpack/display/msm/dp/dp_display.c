@@ -4392,7 +4392,7 @@ static int dp_display_unprepare(struct dp_display *dp_display, void *panel)
 	if (dp->active_stream_cnt)
 		goto end;
 
-	retain_link_power = (IS_ENABLED(CONFIG_SEC_GTS7L_PROJECT) || IS_ENABLED(CONFIG_SEC_GTS7XL_PROJECT)) &&
+	retain_link_power = IS_ENABLED(CONFIG_SEC_DISPLAYPORT_RETAIN_LINK_POWER) &&
 		(flags & DP_PANEL_SRC_INITIATED_POWER_DOWN) &&
 		!dp_display_state_is(DP_STATE_SUSPENDED);
 
@@ -4401,8 +4401,7 @@ static int dp_display_unprepare(struct dp_display *dp_display, void *panel)
 			dp->debug->psm_enabled = false;
 			DP_INFO("retain link power during source initiated unprepare\n");
 		} else {
-			dp->link->psm_config(dp->link,
-					&dp->panel->link_info, true);
+			dp->link->psm_config(dp->link, &dp->panel->link_info, true);
 			dp->debug->psm_enabled = true;
 
 			dp->ctrl->off(dp->ctrl);
@@ -4414,7 +4413,7 @@ static int dp_display_unprepare(struct dp_display *dp_display, void *panel)
 
 	dp_display_state_remove(DP_STATE_ENABLED);
 	dp->aux->state = retain_link_power ?
-		DP_STATE_CTRL_POWERED_ON : DP_STATE_CTRL_POWERED_OFF;
+			DP_STATE_CTRL_POWERED_ON : DP_STATE_CTRL_POWERED_OFF;
 
 	complete_all(&dp->notification_comp);
 
